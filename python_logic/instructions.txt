@@ -1,0 +1,38 @@
+This doc will show how you can use the python wrapper functions to transfer, save, clean, and deploy assets from one account to another (or many).
+
+-- Using aws_cas2 as our example source_account to grab dashboards + filters, save them, and clean them by removinvg metadata we don't need for deploying to new accounts, making the assets 'Generic' and protecting data.
+-- AWS_CAS2
+$appContext_source =  Connect-SFApp -Account aws_cas2
+$appContext_source = Get-SFDashboards -AuthContext $appContext_source
+$appContext_source | foreach {$_.SaveToFolder("my_local_repo/aws_cas2/dashboards")}
+$filters_source = Get-SFFilters -AuthContext $appContext_source
+$filters_source | foreach {$_.SaveToFolder("my_local_repo/aws_cas2/filters")}
+$worksheets_source = Get-SFWorksheets -AuthContext $appContext_source
+$worksheets_source | foreach {$_.SaveToFolder("my_local_repo/aws_cas2/worksheets")}
+
+-- Let's say the account we now want to deploy the dashboards + filters to my_target_account_locator.us-east-1. We will call this account target_account:
+-- set a temp $work_dir var:
+$work_dir = path/to/my_local_repo
+python3 path/to/sfsnowsightextensions/python_logic/dashboard_transfer.py  --folder $work_dir --role ACCOUNTADMIN --warehouse COMPUTE_WH --account my_target_account_locator --out_folder my_target_account_folder
+
+-- set temp vars
+$tmp_filters = Get-ChildItem $work_dir/filters
+$tmp_dashboards = Get-ChildItem $work_dir/dashboards
+$tmp_worksheets = Get-ChildItem $work_dir/worksheets
+
+-- Now we will deploy to the target account:
+$appContext_target =  Connect-SFApp -Account my_target_account_locator
+
+-- Filters
+foreach ($f in $tmp_filters){
+    echo 'NEW DASH'
+    echo $f
+    New-SFFilter -AuthContext $appContext_target -FilterFile $f.FullName -ActionIfExists Overwrite
+}
+
+-- Dashboards
+foreach ($f in $tmp_dashboards){                               
+    echo 'NEW DASH'
+    echo $f                 
+    New-SFDashboard -AuthContext $appContext_target -DashboardFile $f.FullName -ActionIfExists CreateNew
+}
