@@ -23,7 +23,7 @@ def clean_foldername(foldername, out_folder=''):
     return foldername
 
 
-def write_file(folder, filename, out_json, account='', overwrite=False, out_folder=''):
+def write_file(folder, filename, out_json, account='', overwrite=False, out_folder='', clean=True):
     if overwrite:
         cleaned_filename = filename
         cleaned_foldername = folder
@@ -33,7 +33,9 @@ def write_file(folder, filename, out_json, account='', overwrite=False, out_fold
 
     base = Path(cleaned_foldername)
     base.mkdir(parents=True, exist_ok=True)
+    
     clean_json_recursive(out_json, ['FileSystemSafeName'], replacement_vals={'FileSystemSafeName':cleaned_filename})
+        
     fn = f"{cleaned_foldername}/{cleaned_filename}"
     if overwrite:
         print(f"Overwriting file {fn}")
@@ -59,22 +61,33 @@ def clean_json_recursive(json_input, lookup_keys, replacement_vals={}):
             clean_json_recursive(item, lookup_keys, replacement_vals)
 
 
-def change_dashboard_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder=''):
+def change_dashboard_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder='', clean=True):
     # filters = [] # For use in pulling those filters down which are present in dashboards.
     fields_to_clean = ['Role','Warehouse','Database','Schema','OwnerUserID','OwnerUserName','URL','DashboardID','AccountName','AccountFullName','AccountUrl','OrganizationID','Region']
     with open(f"{folder}/{filename}", 'r') as f:
         out_json = json.load(f)
         
-        clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
+        if clean:
+            clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
 
     write_file(folder, filename, out_json, account, overwrite, out_folder)
 
 
-def change_filter_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder=''):
+def change_filter_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder='', clean=True):
     fields_to_clean = ['Role','Warehouse','Database','Schema','OwnerUserID','OwnerUserName','URL','DashboardID','AccountName','AccountFullName','AccountUrl','OrganizationID','Region']
     with open(f"{folder}/{filename}", 'r') as f:
         out_json = json.load(f)
-        
-        clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
+        if clean:
+            clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
 
+    write_file(folder, filename, out_json, account, overwrite, out_folder)
+
+
+def change_worksheet_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder='', clean=True):
+    fields_to_clean = ['FolderID', 'FolderName', 'Role','Warehouse','Database','Schema', 'OwnerUserID','OwnerUserName','URL','DashboardID','AccountName','AccountFullName','AccountUrl','OrganizationID','Region']
+    with open(f"{folder}/{filename}", 'r') as f:
+        out_json = json.load(f)
+        if clean:
+            clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
+    
     write_file(folder, filename, out_json, account, overwrite, out_folder)

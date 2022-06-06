@@ -3,8 +3,7 @@ import argparse
 from utils import change_filter_configuration
 
 if __name__ == '__main__':
-    # python python/change_filter_configs.py -f $work_dir/filters -r ACCOUNTADMIN -w COMPUTE_WH
-    parser = argparse.ArgumentParser(description='Change variables for context dict.')
+    parser = argparse.ArgumentParser(description='Change variables for filter json.')
     parser.add_argument('--folder', '-f', type=str, help='relative path to folder/directory name', default='.')
     parser.add_argument('--role', '-r', type=str, help='role name')
     parser.add_argument('--warehouse', '-w', type=str, help='warehouse name')
@@ -30,7 +29,8 @@ if __name__ == '__main__':
                 schema=args['schema'],
                 account=args['account'],
                 overwrite=args['overwrite'],
-                out_folder=args['out_folder']
+                out_folder=args['out_folder'],
+                clean = args['clean']
             )
     else:
         foldername_parts = args['folder'].split('/')
@@ -46,5 +46,6 @@ if __name__ == '__main__':
             schema=args['schema'],
             account=args['account'],
             overwrite=args['overwrite'],
-            out_folder=args['out_folder']
+            out_folder=args['out_folder'],
+            clean = args['clean']
         )
