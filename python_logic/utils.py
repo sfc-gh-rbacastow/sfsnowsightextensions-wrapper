@@ -23,26 +23,31 @@ def clean_foldername(foldername, out_folder=''):
     return foldername
 
 
-def write_file(folder, filename, out_json, account='', overwrite=False, out_folder='', clean=True):
+def write_file(folder, filename, data, account='', overwrite=False, out_folder='', clean=True):
     if overwrite:
         cleaned_filename = filename
         cleaned_foldername = folder
     else:
-        cleaned_filename = clean_filename(filename, account)
-        cleaned_foldername = clean_foldername(folder, out_folder)
+        if clean:
+            cleaned_filename = clean_filename(filename, account)
+            cleaned_foldername = clean_foldername(folder, out_folder)
+        else:
+            cleaned_filename = filename
+            cleaned_foldername = out_folder
 
     base = Path(cleaned_foldername)
     base.mkdir(parents=True, exist_ok=True)
     
-    clean_json_recursive(out_json, ['FileSystemSafeName'], replacement_vals={'FileSystemSafeName':cleaned_filename})
+    clean_json_recursive(data, ['FileSystemSafeName'], replacement_vals={'FileSystemSafeName':cleaned_filename})
         
     fn = f"{cleaned_foldername}/{cleaned_filename}"
     if overwrite:
         print(f"Overwriting file {fn}")
     else:
         print(f"Creating file {fn}")
+    
     with open(fn, 'w', encoding='utf-8') as f:
-        json.dump(out_json, f, ensure_ascii=False, indent=4)
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 def clean_json_recursive(json_input, lookup_keys, replacement_vals={}):
@@ -90,3 +95,44 @@ def change_worksheet_configuration(folder, filename, role, warehouse, database="
         out_json = json.load(f)
         if clean:
             clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
+    
+    write_file(folder, filename, out_json, account, overwrite, out_folder)
+
+
+def script_to_worksheet(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder='', clean=False):
+    filename_no_extension = filename.split('.sql')[0]
+    filename_no_extension = f"Worksheet.{filename_no_extension}.{account if account else 'Generic'}"
+    worksheet = {
+            "FolderID": "",
+            "FolderName": "",
+            "OwnerUserID": "",
+            "OwnerUserName": "",
+            "Version": 20,
+            "URL": "",
+            "WorksheetID": "",
+            "WorksheetName": "",
+            "StartedUtc": "0001-01-01T00:00:00.0000000Z",
+            "EndedUtc": "0001-01-01T00:00:00.0000000Z",
+            "ModifiedUtc": "0001-01-01T00:00:00.0000000Z",
+            "Role": role,
+            "Warehouse": warehouse,
+            "Database": database,
+            "Schema": schema,
+            "Query": "",
+            "Parameters": [],
+            "Charts": [],
+            "FileSystemSafeName": "",
+            "_CreatedWith": "Snowflake Snowsight Extensions",
+            "_CreatedVersion": "2022.6.2.0",
+            "AccountName": "",
+            "AccountFullName": "",
+            "AccountUrl": "",
+            "OrganizationID": "",
+            "Region": ""
+            }
+
+    with open(f'{folder}/{filename}','r') as f:
+        query = f.read()
+
+    worksheet['Query'] = query
+    write_file(folder, filename, worksheet, account, overwrite, out_folder, clean=clean)

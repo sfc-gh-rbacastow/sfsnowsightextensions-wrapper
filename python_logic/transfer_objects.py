@@ -27,7 +27,6 @@ if __name__ == '__main__':
     parser.add_argument('--account', '-a', type=str, help='target account for filenaming', default='')
     parser.add_argument('--overwrite', '-ow', type=bool, help='overwrite files where they are', default=False)
     parser.add_argument('--out_folder', '-of', type=str, help='rename the directory you wish to be output to', default='')
-    parser.add_argument('--clean', '-c', type=bool, help='Clean the file of any identifiable metadata', default=True)
     args = parser.parse_args()
     args = vars(args)
 

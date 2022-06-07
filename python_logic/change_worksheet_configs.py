@@ -4,7 +4,7 @@ from python_logic.utils import change_worksheet_configuration
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Change variables for worksheet json.')
-    parser.add_argument('--folder', '-f', type=str, help='relative path to folder/directory name', default='.')
+    parser.add_argument('--folder_or_filename', '-f', type=str, help='relative path to folder/directory name or filename', default='.')
     parser.add_argument('--role', '-r', type=str, help='role name')
     parser.add_argument('--warehouse', '-w', type=str, help='warehouse name')
     parser.add_argument('--database', '-d', type=str, help='database name', default='')
@@ -16,12 +16,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = vars(args)
 
-    if os.path.isdir(args['folder']):
-        files = os.listdir(args['folder'])
+    if os.path.isdir(args['folder_or_filename']):
+        files = os.listdir(args['folder_or_filename'])
 
         for file in [x for x in files if '.json' in x.lower()]:
             change_worksheet_configuration(
-                folder=args['folder'],
+                folder=args['folder_or_filename'],
                 filename=file,
                 role=args['role'],
                 warehouse=args['warehouse'],
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                 clean = args['clean']
             )
     else:
-        foldername_parts = args['folder'].split('/')
+        foldername_parts = args['folder_or_filename'].split('/')
         file = foldername_parts[-1]
         del foldername_parts[-1]
         folder = '/'.join(foldername_parts)

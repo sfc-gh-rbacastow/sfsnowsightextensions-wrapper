@@ -3,8 +3,10 @@ import argparse
 from utils import *
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Read a set of .sql scripts and turn them into worksheets')
-    parser.add_argument('--folder', '-f', type=str, help='relative path to folder/directory name', default='.')
+    # ex file: python3 ./python_logic/script_to_worksheet.py --folder_or_filename /path/to/my_script.sql --role MYROLE --warehouse MYWAREHOUSE --database MYDATABASE --schema MYSCHEMA --account MYACCOUNT --out_folder path/to/my_out_dir
+    # ex dir: python3 ./python_logic/script_to_worksheet.py --folder_or_filename /path/to/my/dir --role MYROLE --warehouse MYWAREHOUSE --database MYDATABASE --schema MYSCHEMA --account MYACCOUNT --out_folder path/to/my_out_dir
+    parser = argparse.ArgumentParser(description='Read a one or many .sql scripts and turn them into worksheets')
+    parser.add_argument('--folder_or_filename', '-f', type=str, help='relative path to folder/directory or file name', default='.')
     parser.add_argument('--role', '-r', type=str, help='role name')
     parser.add_argument('--warehouse', '-w', type=str, help='warehouse name')
     parser.add_argument('--database', '-d', type=str, help='database name', default='')
@@ -15,12 +17,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     args = vars(args)
 
-    if os.path.isdir(args['folder']):
-        files = os.listdir(args['folder'])
+    if os.path.isdir(args['folder_or_filename']):
+        files = os.listdir(args['folder_or_filename'])
 
         for file in [x for x in files if '.sql' in x.lower()]:
             script_to_worksheet(
-                folder=args['folder'],
+                folder=args['folder_or_filename'],
                 filename=file,
                 role=args['role'],
                 warehouse=args['warehouse'],
@@ -31,11 +33,11 @@ if __name__ == '__main__':
                 out_folder=args['out_folder']
             )
     else:
-        foldername_parts = args['folder'].split('/')
+        foldername_parts = args['folder_or_filename'].split('/')
         file = foldername_parts[-1]
         del foldername_parts[-1]
         folder = '/'.join(foldername_parts)
-        change_filter_configuration(
+        script_to_worksheet(
             folder=folder,
             filename=file,
             role=args['role'],

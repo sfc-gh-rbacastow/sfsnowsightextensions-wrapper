@@ -13,7 +13,7 @@ $worksheets_source | foreach {$_.SaveToFolder("my_local_repo/aws_cas2/worksheets
 -- Let's say the account we now want to deploy the dashboards + filters to my_target_account_locator.us-east-1. We will call this account target_account:
 -- set a temp $work_dir var:
 $work_dir = path/to/my_local_repo
-python3 path/to/sfsnowsightextensions/python_logic/dashboard_transfer.py  --folder $work_dir --role ACCOUNTADMIN --warehouse COMPUTE_WH --account my_target_account_locator --out_folder my_target_account_folder
+python3 path/to/sfsnowsightextensions/python_logic/dashboard_transfer.py  --folder_or_filename $work_dir --role ACCOUNTADMIN --warehouse COMPUTE_WH --account my_target_account_locator --out_folder my_target_account_folder
 
 -- set temp vars
 $tmp_filters = Get-ChildItem $work_dir/filters
