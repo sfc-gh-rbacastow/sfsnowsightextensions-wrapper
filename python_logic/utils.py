@@ -49,7 +49,8 @@ def clean_json_recursive(json_input, lookup_keys, replacement_vals={}):
     if isinstance(json_input, dict):
         for k, v in json_input.items():
             if type(v) in [dict, list]:
-                clean_json_recursive(json_input[k], lookup_keys, replacement_vals)
+                if json_input[k]:
+                    clean_json_recursive(json_input[k], lookup_keys, replacement_vals)
             elif k in lookup_keys:
                 if k in replacement_vals:
                     json_input[k] = replacement_vals[k]
@@ -74,11 +75,11 @@ def change_dashboard_configuration(folder, filename, role, warehouse, database="
 
 
 def change_filter_configuration(folder, filename, role, warehouse, database="", schema="", account="", overwrite=False, out_folder='', clean=True):
-    fields_to_clean = ['Role','Warehouse','Database','Schema','OwnerUserID','OwnerUserName','URL','DashboardID','AccountName','AccountFullName','AccountUrl','OrganizationID','Region']
+    fields_to_clean = ['Role','Warehouse','Database','Schema','role','warehouse','database','schema','OwnerUserID','OwnerUserName','URL','DashboardID','AccountName','AccountFullName','AccountUrl','OrganizationID','Region']
     with open(f"{folder}/{filename}", 'r') as f:
         out_json = json.load(f)
         if clean:
-            clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
+            clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema, 'role': role, 'warehouse': warehouse, 'database': database, 'schema': schema})
 
     write_file(folder, filename, out_json, account, overwrite, out_folder)
 
@@ -89,5 +90,3 @@ def change_worksheet_configuration(folder, filename, role, warehouse, database="
         out_json = json.load(f)
         if clean:
             clean_json_recursive(out_json, fields_to_clean, {'Role': role, 'Warehouse': warehouse, 'Database': database, 'Schema': schema})
-    
-    write_file(folder, filename, out_json, account, overwrite, out_folder)
